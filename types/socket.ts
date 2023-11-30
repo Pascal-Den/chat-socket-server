@@ -3,3 +3,12 @@ export type SocketUser = {
     room: string;
     messageHistory: string[];
 }
+
+type User = {
+    name: string
+}
+
+export type AllMessages = { 
+    user: User
+    message: string
+}

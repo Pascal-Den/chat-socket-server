@@ -1,10 +1,11 @@
-import {SocketUser} from "./types/socket";
+
 import express from 'express'
 import http from 'http'
 import {Server} from "socket.io";
 import cors from 'cors'
-import {router} from "./route";
-import {addUser, findUser, getAllRoomMessages, getRoomUsers, removeUser} from "./users";
+import {router} from "./src/routes/route";
+import { handleSocketEvents } from './src/controllers/handleSocketEvents';
+
 
 const app = express();
 
@@ -21,65 +22,7 @@ const io = new Server(server, {
   serveClient: false,
 });
 
-io.on('connection', (socket) => {
-  socket.on('join', ({ name, room }: SocketUser) => {
-    socket.join(room);
-
-    const { user, isExist } = addUser({ name, room, messageHistory: [] });
-
-    const userMessage = isExist
-        ? `Welcome back ${user.name}`
-        : `Welcome ${user.name}`;
-
-    socket.emit("message", {
-      data: { user: { name: "" }, message: userMessage },
-    });
-
-    if (isExist) {
-      const allMessages = getAllRoomMessages(room)
-      socket.emit("messageHistory", { data: { messages: allMessages } });
-    }
-
-    socket.broadcast.to(user.room).emit("message", {
-      data: { user: { name: "" }, message: `${user.name} has joined` },
-    });
-
-    io.to(user.room).emit('room', {data: {users: getRoomUsers(user.room)}})
-  });
-
-
-
-  socket.on("sendMessage", ({ message, params }) => {
-
-    const user = findUser(params);
-
-    if (user) {
-      user.messageHistory.push(message);
-      io.to(user.room).emit("message", { data: { user, message } });
-    }
-  });
-
-  socket.on("leftRoom", ({ params }) => {
-    const user = removeUser(params);
-
-    if (user) {
-      const { room, name } = user;
-
-      io.to(room).emit("message", {
-        data: { user: { name: "" }, message: `${name} has left` },
-      });
-
-      io.to(room).emit("room", {
-        data: { users: getRoomUsers(room) },
-      });
-    }
-  });
-
-
-  socket.on('disconnect', () => {
-    console.log('Disconnect');
-  });
-});
+handleSocketEvents(io);
 
 server.listen(5000, () => {
   console.log('Server is running');

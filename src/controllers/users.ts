@@ -1,5 +1,5 @@
-import {trimStr} from "./utils";
-import {SocketUser} from "./types/socket";
+import {trimStr} from "../../utils";
+import {SocketUser, AllMessages} from "../../types/socket";
 
 
 
@@ -35,7 +35,7 @@ export const removeUser = (user: SocketUser) => {
 export const getRoomUsers = (room: string) => users.filter(user => user.room === room)
 
 export const getAllRoomMessages = (room: string) => {
-    const allMessages: any = [];
+    const allMessages: AllMessages[] = [];
 
     users.forEach(user => {
         if (user.room === room) {
