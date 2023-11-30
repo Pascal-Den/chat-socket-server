@@ -4,7 +4,7 @@ import http from 'http'
 import {Server} from "socket.io";
 import cors from 'cors'
 import {router} from "./route";
-import {addUser, findUser, getRoomUsers, removeUser} from "./users";
+import {addUser, findUser, getAllRoomMessages, getRoomUsers, removeUser} from "./users";
 
 const app = express();
 
@@ -25,15 +25,20 @@ io.on('connection', (socket) => {
   socket.on('join', ({ name, room }: SocketUser) => {
     socket.join(room);
 
-    const { user, isExist } = addUser({ name, room });
+    const { user, isExist } = addUser({ name, room, messageHistory: [] });
 
     const userMessage = isExist
-        ? "You back again "
+        ? `Welcome back ${user.name}`
         : `Welcome ${user.name}`;
 
     socket.emit("message", {
       data: { user: { name: "" }, message: userMessage },
     });
+
+    if (isExist) {
+      const allMessages = getAllRoomMessages(room)
+      socket.emit("messageHistory", { data: { messages: allMessages } });
+    }
 
     socket.broadcast.to(user.room).emit("message", {
       data: { user: { name: "" }, message: `${user.name} has joined` },
@@ -49,6 +54,7 @@ io.on('connection', (socket) => {
     const user = findUser(params);
 
     if (user) {
+      user.messageHistory.push(message);
       io.to(user.room).emit("message", { data: { user, message } });
     }
   });

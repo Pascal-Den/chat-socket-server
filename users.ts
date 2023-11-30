@@ -33,3 +33,15 @@ export const removeUser = (user: SocketUser) => {
 };
 
 export const getRoomUsers = (room: string) => users.filter(user => user.room === room)
+
+export const getAllRoomMessages = (room: string) => {
+    const allMessages: any = [];
+
+    users.forEach(user => {
+        if (user.room === room) {
+            allMessages.push(...user.messageHistory.map(msg => ({ user: { name: user.name }, message: msg })));
+        }
+    });
+
+    return allMessages;
+};
