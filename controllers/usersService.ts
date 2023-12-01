@@ -7,7 +7,7 @@ interface MessageHistory {
 }
 
 
-let users: SocketUser[] = [];
+let usersService: SocketUser[] = [];
 export let messageHistory: MessageHistory[] = []
 
 
@@ -17,14 +17,14 @@ export const findUser = (user: SocketUser) => {
     const userName = trimStr(user.name)
     const userRoom = trimStr(user.room)
 
-    return users.find(u => trimStr(u.name) === userName
+    return usersService.find(u => trimStr(u.name) === userName
         && trimStr(u.room) === userRoom );
 }
 
 export const addUser = (user: SocketUser) => {
     const isExist = findUser(user)
     if(!isExist) {
-        users.push(user)
+        usersService.push(user)
     }
     return { isExist: !!isExist, user}
 }
@@ -33,14 +33,14 @@ export const removeUser = (user: SocketUser) => {
     const found = findUser(user);
 
     if (found) {
-        users = users.filter(
+        usersService = usersService.filter(
             ({ room, name }) => room === found.room && name !== found.name
         );
     }
     return found;
 };
 
-export const getRoomUsers = (room: string) => users.filter(user => user.room === room)
+export const getRoomUsers = (room: string) => usersService.filter(user => user.room === room)
 
 export const addMessageToHistory = (user: SocketUser, message: string) => {
     messageHistory.push({user, message})

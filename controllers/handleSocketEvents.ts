@@ -6,7 +6,7 @@ import {
   getRoomUsers,
   getAllRoomMessages,
   removeUser
-} from "./users";
+} from "./usersService";
 import { Server } from 'socket.io';
 
 export function handleSocketEvents (io: Server) { 
@@ -28,10 +28,16 @@ export function handleSocketEvents (io: Server) {
   
   
     socket.on("sendMessage", ({ message, params }) => {
-  
+      const {name, room} = params
       const user = findUser(params);
 
+
+
       if (user) {
+        addMessageToHistory(user, message);
+        io.to(user.room).emit("message", { data: { user, message } });
+      } else {
+         const {user} = addUser({ name, room});
         addMessageToHistory(user, message);
         io.to(user.room).emit("message", { data: { user, message } });
       }

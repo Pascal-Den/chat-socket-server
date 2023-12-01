@@ -27,7 +27,7 @@ const io = new Server(server, {
 handleSocketEvents(io);
 
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 server.listen(port, () => {
   console.log(`Server is running on ${port}`);
