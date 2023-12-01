@@ -1,11 +1,19 @@
-import {trimStr} from "../../utils";
-import {SocketUser, AllMessages} from "../../types/socket";
+import {trimStr} from "../utils";
+import {SocketUser} from "../types/socket";
 
+interface MessageHistory {
+    user: SocketUser;
+    message: string;
+}
 
 
 let users: SocketUser[] = [];
+export let messageHistory: MessageHistory[] = []
+
+
 
 export const findUser = (user: SocketUser) => {
+
     const userName = trimStr(user.name)
     const userRoom = trimStr(user.room)
 
@@ -15,9 +23,10 @@ export const findUser = (user: SocketUser) => {
 
 export const addUser = (user: SocketUser) => {
     const isExist = findUser(user)
-    !isExist && users.push(user)
-    const currentUser = isExist || user;
-    return { isExist: !!isExist, user: currentUser}
+    if(!isExist) {
+        users.push(user)
+    }
+    return { isExist: !!isExist, user}
 }
 
 export const removeUser = (user: SocketUser) => {
@@ -25,7 +34,6 @@ export const removeUser = (user: SocketUser) => {
 
     if (found) {
         users = users.filter(
-
             ({ room, name }) => room === found.room && name !== found.name
         );
     }
@@ -34,14 +42,11 @@ export const removeUser = (user: SocketUser) => {
 
 export const getRoomUsers = (room: string) => users.filter(user => user.room === room)
 
+export const addMessageToHistory = (user: SocketUser, message: string) => {
+    messageHistory.push({user, message})
+};
+
+
 export const getAllRoomMessages = (room: string) => {
-    const allMessages: AllMessages[] = [];
-
-    users.forEach(user => {
-        if (user.room === room) {
-            allMessages.push(...user.messageHistory.map(msg => ({ user: { name: user.name }, message: msg })));
-        }
-    });
-
-    return allMessages;
+    return messageHistory.filter(message => message.user.room === room)
 };

@@ -3,15 +3,17 @@ import express from 'express'
 import http from 'http'
 import {Server} from "socket.io";
 import cors from 'cors'
-import {router} from "./src/routes/route";
-import { handleSocketEvents } from './src/controllers/handleSocketEvents';
+import {router} from "./routes/route";
+import { handleSocketEvents } from './controllers/handleSocketEvents';
 
+import {helmetConfig} from "./helmetConfig";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(router);
+app.use(helmetConfig)
 
 const server = http.createServer(app);
 
@@ -24,8 +26,11 @@ const io = new Server(server, {
 
 handleSocketEvents(io);
 
-server.listen(5000, () => {
-  console.log('Server is running');
+
+const port = process.env.PORT || 5000;
+
+server.listen(port, () => {
+  console.log(`Server is running on ${port}`);
 });
 
 
